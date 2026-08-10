@@ -7,7 +7,7 @@ german saterical news site
 DISCLAIMER: der allerallermeiste code hier ist KI generiert :3
 
 ## Setup:
-1. run ./setup.sh
+1. run ./setup.sh </br>
 done
 
 ## Running:
@@ -19,4 +19,4 @@ python manage.py runserver
 ## Issues:
 please don't
 
-unless you found an issue. 
+unless you found an issue.
