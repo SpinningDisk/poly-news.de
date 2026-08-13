@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="de"{% if theme %} data-theme="{{ theme }}"{% endif %}>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ article.title }} &ndash; Poly News Tageszeitung</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rye&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'home/styles.css' %}">
+</head>
+<body>
+
+    <nav class="site-nav">
+        <a class="masthead" href="{% url 'home' %}">Poly News <span>Tageszeitung</span></a>
+        <a class="back-link" href="{% url 'home' %}">&larr; Zur Startseite</a>
+        <div class="nav-links">
+            <a href="{% url 'home' %}" class="nav-link">Alle</a>
+            {% for cat in categories %}
+                <a href="{% url 'home' %}?category={{ cat }}" class="nav-link">{{ cat }}</a>
+            {% endfor %}
+            <span class="nav-sep">|</span>
+            <a href="{% url 'home' %}?origin=ai" class="nav-link">KI</a>
+            <a href="{% url 'home' %}?origin=human" class="nav-link">Mensch</a>
+            <form method="post" action="{% url 'set_theme' %}" class="theme-toggle">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ current_path }}">
+                <button type="submit" name="theme" value="{% if theme == 'dark' %}light{% else %}dark{% endif %}" class="toggle-btn">
+                    {% if theme == 'dark' %}&#9728;&#65039; Hell{% else %}&#127769; Dunkel{% endif %}
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <article class="article-detail">
+        {% if article.image_url %}
+            <img class="article-img" src="{{ article.image_url }}" alt="">
+        {% endif %}
+        <div class="detail-tags">
+            <span class="tag">{{ article.category|default:"Meldung" }}</span>
+            <span class="tag origin-tag origin-{{ article.origin }}">{{ article.origin_label }}</span>
+        </div>
+        <h1>{{ article.title }}</h1>
+        <p class="dateline">{{ article.event_date }}</p>
+        <div class="article-body">
+            {{ article.text|linebreaks }}
+        </div>
+    </article>
+
+    <div id="footer">
+        <p>&copy; {% now "Y" %} Poly News Tageszeitung &ndash; rein satirisch, garantiert unseriös.</p>
+    </div>
+
+</body>
+</html>

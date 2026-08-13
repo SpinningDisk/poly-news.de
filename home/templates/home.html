@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de"{% if theme %} data-theme="{{ theme }}"{% endif %}>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rye&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'home/styles.css' %}">
 </head>
 <body>
@@ -26,66 +27,137 @@
             {% endfor %}
         </div>
     </div>
-    <!-- Real ticker data, once, for screen readers -->
-    <ul class="sr-only" aria-label="Börsenkurse">
+    <ul class="sr-only" id="ticker-sr-list" aria-label="Börsenkurse">
         {% for item in ticker %}
             <li>{{ item.symbol }}: {{ item.change }}%</li>
         {% endfor %}
     </ul>
 
     <nav class="site-nav">
-        <a class="masthead" href="{% url 'home' %}">Poly News <span>Tageszeitung</span></a>
-        <!-- future nav links go here -->
-        <form method="post" action="{% url 'set_ai_mode' %}" class="ai-toggle">
-            {% csrf_token %}
-            <span class="ai-toggle-label">KI:</span>
-            <button type="submit" name="ai_mode" value="server" class="toggle-btn {% if ai_mode == 'server' %}active{% endif %}">Server</button>
-            <button type="submit" name="ai_mode" value="local" class="toggle-btn {% if ai_mode == 'local' %}active{% endif %}">Lokal</button>
-        </form>
+        <div class="nav-top">
+            <a class="masthead" href="{% url 'home' %}">Poly News <span>Tageszeitung</span></a>
+            <div class="nav-controls">
+                <form method="post" action="{% url 'set_ai_mode' %}" class="ai-toggle">
+                    {% csrf_token %}
+                    <span class="ai-toggle-label">KI:</span>
+                    <button type="submit" name="ai_mode" value="server" class="toggle-btn {% if ai_mode == 'server' %}active{% endif %}">Server</button>
+                    <button type="submit" name="ai_mode" value="local" class="toggle-btn {% if ai_mode == 'local' %}active{% endif %}">Lokal</button>
+                </form>
+                <form method="post" action="{% url 'set_theme' %}" class="theme-toggle">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ current_path }}">
+                    <button type="submit" name="theme" value="{% if theme == 'dark' %}light{% else %}dark{% endif %}" class="toggle-btn">
+                        {% if theme == 'dark' %}&#9728;&#65039; Hell{% else %}&#127769; Dunkel{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="nav-links">
+            <a href="{% url 'home' %}" class="nav-link {% if not current_category and not current_origin %}active{% endif %}">Alle</a>
+            {% for cat in categories %}
+                <a href="?category={{ cat }}" class="nav-link {% if current_category == cat %}active{% endif %}">{{ cat }}</a>
+            {% endfor %}
+            <span class="nav-sep">|</span>
+            <a href="?origin=ai" class="nav-link {% if current_origin == 'ai' %}active{% endif %}">KI</a>
+            <a href="?origin=human" class="nav-link {% if current_origin == 'human' %}active{% endif %}">Mensch</a>
+        </div>
     </nav>
 
-    {% if headline %}
-        <div id="headline" class="article-headline">
-            {% if headline.image_url %}
-                <img class="article-img" src="{{ headline.image_url }}" alt="">
-            {% endif %}
-            <div class="headline-content">
-                <span class="tag">{{ headline.category|default:"Meldung" }}</span>
-                <h1>{{ headline.title }}</h1>
-                <p class="dateline">{{ headline.event_date }}</p>
-                <p class="lede">{{ headline.text|truncatewords:40 }}</p>
+    {% if not current_category and not current_origin %}
+        {% if headline %}
+            <a class="headline-link" href="{% url 'article_detail' slug=headline.slug %}">
+                <div id="headline" class="article-headline">
+                    {% if headline.image_url %}
+                        <img class="article-img" src="{{ headline.image_url }}" alt="">
+                    {% endif %}
+                    <div class="headline-content">
+                        <span class="tag">{{ headline.category|default:"Meldung" }}</span>
+                        <span class="tag origin-tag origin-{{ headline.origin }}">{{ headline.origin_label }}</span>
+                        <h1>{{ headline.title }}</h1>
+                        <p class="dateline">{{ headline.event_date }}</p>
+                        <p class="lede">{{ headline.preview }}</p>
+                    </div>
+                </div>
+            </a>
+        {% else %}
+            <div id="headline" class="article-headline empty">
+                <div class="headline-content">
+                    <span class="tag">Redaktionsschluss</span>
+                    <h1>Hier fehlt noch die Schlagzeile</h1>
+                    <p class="lede">Sobald der erste Artikel verarbeitet ist, erscheint er hier &ndash; groß, fett, unübersehbar.</p>
+                </div>
             </div>
-        </div>
-    {% else %}
-        <div id="headline" class="article-headline empty">
-            <div class="headline-content">
-                <span class="tag">Redaktionsschluss</span>
-                <h1>Hier fehlt noch die Schlagzeile</h1>
-                <p class="lede">Sobald der erste Artikel verarbeitet ist, erscheint er hier &ndash; groß, fett, unübersehbar.</p>
-            </div>
-        </div>
+        {% endif %}
     {% endif %}
 
     <div id="articles-root">
         {% for article in articles %}
-            <article class="article-card">
-                <span class="tape" aria-hidden="true"></span>
-                {% if article.image_url %}
-                    <img class="card-img" src="{{ article.image_url }}" alt="">
-                {% endif %}
-                <span class="tag">{{ article.category|default:"Meldung" }}</span>
-                <h2>{{ article.title }}</h2>
-                <p class="dateline">{{ article.event_date }}</p>
-                <p>{{ article.text|truncatewords:25 }}</p>
-            </article>
+            <a class="article-link" href="{% url 'article_detail' slug=article.slug %}">
+                <article class="article-card">
+                    <span class="tape" aria-hidden="true"></span>
+                    {% if article.image_url %}
+                        <img class="card-img" src="{{ article.image_url }}" alt="">
+                    {% endif %}
+                    <span class="tag">{{ article.category|default:"Meldung" }}</span>
+                    <span class="tag origin-tag origin-{{ article.origin }}">{{ article.origin_label }}</span>
+                    <h2>{{ article.title }}</h2>
+                    <p class="dateline">{{ article.event_date }}</p>
+                    <p>{{ article.preview }}</p>
+                </article>
+            </a>
         {% empty %}
-            <p class="empty-note">Noch keine weiteren Artikel &ndash; die Redaktion schreibt gerade.</p>
+            <p class="empty-note">Noch keine Artikel in dieser Ansicht.</p>
         {% endfor %}
     </div>
 
     <div id="footer">
         <p>&copy; {% now "Y" %} Poly News Tageszeitung &ndash; rein satirisch, garantiert unseriös.</p>
     </div>
+
+    <script>
+    (function () {
+        var ticker = document.getElementById("stock");
+        var track = ticker.querySelector(".ticker-track");
+        var srList = document.getElementById("ticker-sr-list");
+        var wasVisible = true;
+
+        function renderTicker(items) {
+            var html = "";
+            for (var rep = 0; rep < 10; rep++) {
+                items.forEach(function (item) {
+                    var cls = item.change < 0 ? "down" : "up";
+                    var arrow = item.change > 0 ? "\u25B2" : "\u25BC";
+                    html += '<a class="ticker-item ' + cls + '" href="' + item.url +
+                        '" target="_blank" rel="noopener" tabindex="-1">' +
+                        '<span class="ticker-symbol">' + item.symbol + '</span>' +
+                        '<span class="ticker-change">' + arrow + ' ' + item.change + '%</span></a>';
+                });
+            }
+            track.innerHTML = html;
+            srList.innerHTML = items.map(function (item) {
+                return "<li>" + item.symbol + ": " + item.change + "%</li>";
+            }).join("");
+        }
+
+        function refreshTicker() {
+            fetch("{% url 'ticker_data' %}")
+                .then(function (r) { return r.json(); })
+                .then(function (data) { renderTicker(data.ticker); })
+                .catch(function () { /* keep showing the old values on failure */ });
+        }
+
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting && wasVisible) {
+                    refreshTicker();
+                }
+                wasVisible = entry.isIntersecting;
+            });
+        }, { threshold: 0 });
+
+        observer.observe(ticker);
+    })();
+    </script>
 
 </body>
 </html>

@@ -1,16 +1,26 @@
+-- O for Open; X for closed/finished
 # Articles
-    O make Articles clickable
+    X make Articles clickable
     O create an editor for users to submit requests
-    O new Group for Journalists who we trust (they are either the only ones to write or they can acknowledge other peoples articles)
+    X new Group for Journalists who we trust (they are either the only ones to write or they can acknowledge other peoples articles)
         O add clanker tag on ai generated things
-    O Let users take the bullet and enable a self-generate toggle which lets them fetch tagesschau articles, pass them through our ai locally and send them back themself
-        O db keeping track of users (with toggle field)
-        O on cron trigger somehow check if any user with toggle on is pressent and send a signal; user fetches from tagesschau api and sends the raw article to the server (for if user quits while generating); user generates article and sends it back; we store it with a new tag "user-generated" and let our Journalists check it for errors before it goes public
-        O if no users are online (or quit in time) we generate it ourself
 # Navbar
     O Make one
-    O categories (news, sports, tech, economy, ..., ai|human)
-    O dark mode
+    O categories filter(news, sports, tech, economy, ..., ai|human)
+        O maybe seperate page (potentially styled, e.g. for sports football background and fitnessy-icons, for news newspaper background, seasonal matching background, etc.)
+    O user prefferences
+        X dark mode
+            O toggle
+            O own color selection (wait a bit, we'll add a user page later, but let's make that in a seperate message)
+
 # More conspiracy
-    O make red string between articles
-    O make articles look like pinboard entries
+    OX make red connection string between articles
+    X make articles look like pinboard entries
+
+# ai
+    O add system prompt "Du bist ein Journalist der emotionale und explosive klatsch-artikel schreibt. Du bist sehr verschwörungstheoreterisch, beziehst dich aber trotzdem NUR ausschließlich auf wahren Begebenheiten). Du sollst auserdem den Eindruck eines bekannten stammtisch mitglieds geben der auf den Tisch haut und dann deine Nachricht im monolog spricht"
+    O Let users take the bullet and enable a self-generate toggle which lets them fetch tagesschau articles, pass them through our ai locally and send them back to server themself
+        O db keeping track of users willing to donate compute for AI (with toggle field)
+        O on cron trigger somehow check if any user with toggle on is pressent and send a signal; user fetches from tagesschau api and sends the raw article to the server (for if user quits while generating); user generates article and sends it back; we store it with a new tag "user-generated" and let our Journalists check it for errors before it goes public
+        O if no users are online (or quit in time) we generate it ourself
+

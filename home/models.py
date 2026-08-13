@@ -1,15 +1,26 @@
 from django.db import models
-from django.utils.text import slugify
+from django.utils.text import Truncator, slugify
 
 
 class Article(models.Model):
-    # Core fields you asked for
+    ORIGIN_CHOICES = [
+        ("ai", "KI-generiert"),
+        ("human", "Redaktion"),
+        ("user", "Nutzer-generiert"),
+    ]
+    ORIGIN_EMOJI = {"ai": "\U0001F916", "human": "\u270D\uFE0F", "user": "\U0001F64B"}
+
+    # Core fields
     text = models.TextField(help_text="The (rewritten, satirical) article body")
     event_date = models.DateField(help_text="When the real-world event actually happened")
     category = models.CharField(max_length=50, blank=True)
 
-    # Extra fields that pay for themselves quickly
+    # Extra fields
     title = models.CharField(max_length=200)
+    preview_text = models.CharField(
+        max_length=100, blank=True,
+        help_text="Short preview text for the home page article. Leave blank to auto-generate one from `text`.",
+    )
     slug = models.SlugField(max_length=220, unique=True, blank=True)
     image_url = models.URLField(blank=True)
     source_url = models.URLField(blank=True, help_text="Original source article, for reference/attribution")
@@ -17,6 +28,7 @@ class Article(models.Model):
         max_length=100, unique=True, null=True, blank=True,
         help_text="ID from the source API, used to avoid fetching the same item twice",
     )
+    origin = models.CharField(max_length=10, choices=ORIGIN_CHOICES, default="ai")
     is_headline = models.BooleanField(default=False, help_text="Pin this as the big top story")
     ai_processed = models.BooleanField(
         default=False,
@@ -41,13 +53,19 @@ class Article(models.Model):
     def __str__(self):
         return self.title
 
+    @property
+    def preview(self):
+        if self.preview_text:
+            return self.preview_text
+        return Truncator(self.text).words(25, truncate=" \u2026")
+
+    @property
+    def origin_label(self):
+        return f"{self.ORIGIN_EMOJI.get(self.origin, '')} {self.get_origin_display()}".strip()
+
 
 class SiteSettings(models.Model):
-    """
-    Site-wide switches. Deliberately a singleton (always pk=1) rather than
-    a per-visitor setting, since it controls how the *fetch job* behaves,
-    and the fetch job doesn't run in the context of any particular visitor.
-    """
+    """Singleton (always pk=1): site-wide switches that the fetch job reads."""
 
     AI_MODE_CHOICES = [
         ("server", "Server-KI (automatisch)"),

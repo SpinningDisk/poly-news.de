@@ -1,16 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Rye&display=swap');
 :root {
     --paper: #F2EFE4;
     --ink: #1A1A18;
     --muted: #6B665C;
     --rule: #C9C2AE;
-    --scandal: #E0177D;
+    --scandal: #3F2E63;
     --tape-color: #F4C310;
     --up: #2E7D46;
     --down: #C4331F;
+    --card-bg: #ffffff;
 
     --font-display: 'Anton', sans-serif;
+    --font-title: 'Rye', serif;
     --font-body: 'Source Serif 4', Georgia, serif;
     --font-mono: 'JetBrains Mono', monospace;
+
+    --paper-ensurelight: #C9D6F0;
 }
 
 * { box-sizing: border-box; }
@@ -62,7 +67,7 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--scandal); outli
 /* --- Stock ticker --- */
 .ticker {
     background: var(--ink);
-    color: var(--paper);
+    color: var(--paper-ensurelight);
     overflow: hidden;
     white-space: nowrap;
     border-bottom: 3px solid var(--tape-color);
@@ -95,13 +100,15 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--scandal); outli
 /* --- Nav / masthead --- */
 .site-nav {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     padding: 1rem 2rem;
     border-bottom: 3px double var(--ink);
+    gap: 0.4rem;
 }
 .masthead {
-    font-family: var(--font-display);
+    font-family: var(--font-title);
     font-size: 2rem;
     text-decoration: none;
     letter-spacing: 0.02em;
@@ -151,7 +158,7 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--scandal); outli
 }
 .article-card {
     position: relative;
-    background: #fff;
+    background: var(--card-bg);
     padding: 1.25rem;
     border: 1px solid var(--rule);
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
@@ -190,4 +197,149 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--scandal); outli
         padding-left: 1rem;
         padding-right: 1rem;
     }
+}
+
+/* --- Nav: top row + filter links --- */
+.nav-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.nav-links {
+    display: flex;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.85rem;
+    margin-top: 0.2rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+}
+.nav-link {
+    text-decoration: none;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.nav-link.active { color: var(--scandal); text-decoration: underline; }
+.nav-sep { color: var(--rule); }
+.back-link {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    text-decoration: none;
+    background-color: var(--scandal);
+    border-radius: 5px;
+    padding: 4px;
+}
+.back-link:hover {
+    text-decoration: none;
+    border-radius: 7px;
+    padding: 6px;
+}
+
+/* --- Whole-card / whole-headline links --- */
+.headline-link, .article-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+}
+.article-link { height: 100%; }
+
+/* --- Origin tag (clanker tag) --- */
+.origin-tag {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--rule);
+    margin-left: 0.4em;
+}
+
+/* --- Article detail page --- */
+.article-detail {
+    max-width: 70ch;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+}
+.article-detail .article-img {
+    width: 100%;
+    max-height: 420px;
+    object-fit: cover;
+    margin-bottom: 1.5rem;
+}
+.detail-tags { margin-bottom: 0.75rem; }
+.article-detail h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    line-height: 1;
+    text-transform: uppercase;
+    margin: 0.3em 0;
+}
+.article-body { margin-top: 1.5rem; font-size: 1.05rem; }
+.article-body p { margin: 0 0 1.2em; }
+
+/* --- Conspiracy board flourish: red string + pins --- */
+#articles-root {
+    position: relative;
+    background-image: repeating-linear-gradient(
+        135deg,
+        transparent 0 38px,
+        rgba(143, 0, 0, 0.12) 38px 40px
+    );
+}
+.article-card { position: relative; overflow: visible; }
+.article-card::after {
+    content: "";
+    position: absolute;
+    top: 6px;
+    right: 12px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--scandal);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* --- Dark mode (follows system setting) --- */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --paper: #1B1A17;
+        --ink: #EDEAE0;
+        --muted: #A39C8C;
+        --rule: #3A362E;
+        --card-bg: #262420;
+    }
+    .ticker { background: #000; }
+}
+
+/* --- Nav controls grouping (ai-toggle + theme-toggle together) --- */
+.nav-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+.theme-toggle { display: inline-flex; }
+
+/* --- Manual theme override (beats the system prefers-color-scheme default) --- */
+html[data-theme="dark"] {
+    --paper: #1B1A17;
+    --ink: #EDEAE0;
+    --muted: #A39C8C;
+    --rule: #3A362E;
+    --card-bg: #262420;
+}
+html[data-theme="dark"] .ticker { background: #000; }
+
+html[data-theme="light"] {
+    --paper: #F2EFE4;
+    --ink: #1A1A18;
+    --muted: #6B665C;
+    --rule: #C9C2AE;
+    --card-bg: #ffffff;
+}
+html[data-theme="light"] .ticker { background: var(--ink); }
+
+/* --- Bolder "clanker tag" for AI-generated content --- */
+.origin-tag.origin-ai {
+    background: var(--scandal);
+    color: var(--paper);
+    border: none;
 }

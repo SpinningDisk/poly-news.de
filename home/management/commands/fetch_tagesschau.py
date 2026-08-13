@@ -9,12 +9,10 @@ from home.models import Article, SiteSettings
 
 API_URL = "https://www.tagesschau.de/api2u/homepage/"
 
-# Preference order for which image size/crop to store, falling back to
-# whatever's available if none of these keys exist on a given item.
 PREFERRED_IMAGE_KEYS = ["16x9-640", "16x9-432", "16x9-256", "1x1-432", "1x1-256"]
 
 
-def pick_image_url(teaser_image): # get placeholder images for now
+def pick_image_url(teaser_image):
     variants = (teaser_image or {}).get("imageVariants", {})
     for key in PREFERRED_IMAGE_KEYS:
         if key in variants:
@@ -39,7 +37,7 @@ class Command(BaseCommand):
         fresh_items = [item for item in items if item.get("externalId") not in known_ids]
 
         if not fresh_items:
-            print("Keine neuen Artikel gefunden.")
+            self.stdout.write("Keine neuen Artikel gefunden.")
             return
 
         item = random.choice(fresh_items)
@@ -49,9 +47,6 @@ class Command(BaseCommand):
             if item.get("date")
             else datetime.now().date()
         )
-        if not item.get("date"):
-            print(f"\033[31;1mWARNING: article {item.get("title")} has no date associated; using current")
-
         text = f"{item.get('topline', '')} {item.get('firstSentence', '')}".strip()
 
         article = Article.objects.create(
@@ -63,13 +58,16 @@ class Command(BaseCommand):
             image_url=pick_image_url(item.get("teaserImage")),
             source_url=item.get("shareURL", ""),
             is_headline=bool(item.get("breakingNews")),
+            origin="ai",
             ai_processed=False,
         )
 
         if SiteSettings.load().ai_mode == "server":
-            new_title, new_text = rewrite_article(article.title, article.text)
+            new_title, new_preview, new_text = rewrite_article(article.title, article.text)
             article.title = new_title
             article.text = new_text
+            if new_preview:
+                article.preview_text = new_preview
             article.ai_processed = True
             article.save()
             self.stdout.write(f"Neuer Artikel (KI-verarbeitet): {article.title}")
