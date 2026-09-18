@@ -4,7 +4,8 @@ german saterical news site
 
 \<s\>Eine Website die endlich mal auf den Tisch haut und die Wahrheit sagt. Weil das darf man ja heutzutage garnichtmehr! \</s\>; </br>
 
-DISCLAIMER: der allerallermeiste code hier ist KI generiert :3
+DISCLAIMER: der allerallermeiste code hier ist KI generiert :3; ist ein Projekt zum ausprobieren von vibe-coding für mich
+
 
 ## Setup:
 1. run ./setup.sh </br>
